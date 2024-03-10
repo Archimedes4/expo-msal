@@ -1,0 +1,9 @@
+{
+  "platforms": ["ios", "tvos", "android", "web"],
+  "ios": {
+    "modules": ["ExpoMsalModule"]
+  },
+  "android": {
+    "modules": ["expo.modules.msal.ExpoMsalModule"]
+  }
+}
