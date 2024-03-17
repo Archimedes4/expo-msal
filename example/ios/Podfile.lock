@@ -20,6 +20,7 @@ PODS:
     - ReactCommon/turbomodule/core
   - ExpoMsal (0.1.0):
     - ExpoModulesCore
+    - MSAL
   - FBLazyVector (0.73.4)
   - FBReactNativeSpec (0.73.4):
     - RCT-Folly (= 2022.05.16.00)
@@ -34,6 +35,9 @@ PODS:
     - hermes-engine/Pre-built (= 0.73.4)
   - hermes-engine/Pre-built (0.73.4)
   - libevent (2.1.12)
+  - MSAL (1.2.5):
+    - MSAL/app-lib (= 1.2.5)
+  - MSAL/app-lib (1.2.5)
   - RCT-Folly (2022.05.16.00):
     - boost
     - DoubleConversion
@@ -1139,6 +1143,7 @@ SPEC REPOS:
   trunk:
     - fmt
     - libevent
+    - MSAL
     - SocketRocket
 
 EXTERNAL SOURCES:
@@ -1263,13 +1268,14 @@ SPEC CHECKSUMS:
   ExpoFileSystem: eecaf6796aed0f4dd20042dc2ca2cac6c4bc1185
   ExpoKeepAwake: 0f5cad99603a3268e50af9a6eb8b76d0d9ac956c
   ExpoModulesCore: b2ae7a3fc6193556273c5db90065fbe7e11c7a60
-  ExpoMsal: ead4142f99eb66299be3d7652e58ca2b550eda7a
+  ExpoMsal: e76eddaeca9911766c3eebfe2c6e77c38111b972
   FBLazyVector: 84f6edbe225f38aebd9deaf1540a4160b1f087d7
   FBReactNativeSpec: d0086a479be91c44ce4687a962956a352d2dc697
   fmt: ff9d55029c625d3757ed641535fd4a75fedc7ce9
   glog: c5d68082e772fa1c511173d6b30a9de2c05a69a2
   hermes-engine: b2669ce35fc4ac14f523b307aff8896799829fe2
   libevent: 4049cae6c81cdb3654a443be001fb9bdceff7913
+  MSAL: 5149daaa19228c2c27d81987634da15b50981cef
   RCT-Folly: 7169b2b1c44399c76a47b5deaaba715eeeb476c0
   RCTRequired: ab7f915c15569f04a49669e573e6e319a53f9faa
   RCTTypeSafety: 63b97ced7b766865057e7154db0e81ce4ee6cf1e

@@ -1,0 +1,12 @@
+{
+  "expo": {
+    "extra": {
+      "eas": {
+        "projectId": "0a50873c-dec0-4cee-868b-472821508c60"
+      }
+    },
+    "android": {
+      "package": "com.archimedes4.expomsal"
+    }
+  }
+}

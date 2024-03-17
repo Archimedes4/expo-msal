@@ -27,6 +27,12 @@
         <category android:name="android.intent.category.BROWSABLE"/>
         <data android:scheme="expo.modules.msal.example"/>
       </intent-filter>
+      <intent-filter data-generated="true">
+        <action android:name="android.intent.action.VIEW"/>
+        <data android:scheme="msauth" android:host="expo.modules.msal.example"/>
+        <category android:name="android.intent.category.DEFAULT"/>
+        <category android:name="android.intent.category.BROWSABLE"/>
+      </intent-filter>
     </activity>
     <activity android:name="com.facebook.react.devsupport.DevSettingsActivity" android:exported="false"/>
   </application>

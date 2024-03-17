@@ -28,7 +28,10 @@
   "author": "Archimedes4 <82121191+AMCanada16@users.noreply.github.com> ()",
   "license": "MIT",
   "homepage": "https://github.com/dashboard#readme",
-  "dependencies": {},
+  "dependencies": {
+    "@azure/msal-browser": "^3.10.0",
+    "@azure/msal-react": "^2.0.12"
+  },
   "devDependencies": {
     "@types/react": "^18.0.25",
     "expo-module-scripts": "^3.4.1",
