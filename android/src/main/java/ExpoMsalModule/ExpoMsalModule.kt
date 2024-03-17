@@ -1,5 +1,4 @@
-
-package expo.modules.expomsal
+package expo.modules.msal
 
 import expo.modules.kotlin.Promise
 import expo.modules.kotlin.modules.Module
@@ -7,7 +6,7 @@ import expo.modules.kotlin.modules.ModuleDefinition
 import expo.modules.kotlin.records.Field
 import expo.modules.kotlin.records.Record
 
-class ExpoMsal: Module() {
+class ExpoMsalModule: Module() {
   // Each module class must implement the definition function. The definition consists of components
   // that describes the module's functionality and behavior.
   // See https://docs.expo.dev/modules/module-api for more details about available components.
@@ -28,6 +27,25 @@ class ExpoMsal: Module() {
     AsyncFunction("signOut") { config: MSALConfig, promise: Promise ->
       promise.resolve("Thing")
     }
+  }
+  suspend fun loadApplication() {
+    PublicClientApplication.createSingleAccountPublicClientApplication(
+      appContext.activityProvider?.currentActivity?.window?.context,
+      R.raw.auth_config_single_account,
+      object : ISingleAccountApplicationCreatedListener {
+        override fun onCreated(application: ISingleAccountPublicClientApplication) {
+          /*
+               * This test app assumes that the app is only going to support one account.
+               * This requires "account_mode" : "SINGLE" in the config json file.
+               */
+          mSingleAccountApp = application
+          loadAccount()
+        }
+
+        override fun onError(exception: MsalException) {
+          displayError(exception)
+        }
+      })
   }
 }
 
