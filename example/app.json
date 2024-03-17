@@ -46,8 +46,9 @@
         "action":"VIEW",
         "category": ["DEFAULT", "BROWSABLE"],
         "data":{
-          "scheme": "msauth",
-          "host": "expo.modules.msal.example"
+          "scheme": "expo.modules.msal.example",
+          "host": "auth",
+          "path":""
         }
       }]
     },

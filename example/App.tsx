@@ -21,6 +21,11 @@ export function Content() {
     // On native retuns value, web no value to be returned
     setToken(await MSAL.acquireTokenInteractively())
   }
+  async function signOut() {
+    console.log("Testing log")
+    // On native retuns value, web no value to be returned
+    console.log(await MSAL.signOut())
+  }
 
   useEffect(() => {
     getToken()
@@ -30,7 +35,7 @@ export function Content() {
       <Text style={{color: "white"}}>{token}</Text>
       <Button title='Login' onPress={() => {getTokenInter()}}/>
       <Button title='Get Silent' onPress={() => {getToken()}}/>
-      <Button title='Logout' onPress={() => {getToken()}}/>
+      <Button title='Logout' onPress={() => {signOut()}}/>
     </View>
   )
 }

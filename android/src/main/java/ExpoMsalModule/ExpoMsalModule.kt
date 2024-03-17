@@ -12,6 +12,7 @@ import expo.modules.kotlin.modules.ModuleDefinition
 import expo.modules.kotlin.records.Field
 import expo.modules.kotlin.records.Record
 import kotlinx.coroutines.suspendCancellableCoroutine
+import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
 import java.io.FileWriter
@@ -31,22 +32,24 @@ class ExpoMsalModule: Module() {
 
     // Defines a JavaScript function that always returns a Promise and whose native code
     // is by default dispatched on the different thread than the JavaScript runtime runs on.
-    AsyncFunction("acquireTokenInteractively") Coroutine { config: MSALConfig, promise: Promise ->
+    AsyncFunction("acquireTokenInteractively") Coroutine { config: MSALConfig ->
       val application: ISingleAccountPublicClientApplication = loadApplication(config) ?:run {
-        promise.resolve("No Public Client Application")
-        return@Coroutine
+        return@Coroutine "No Public Client Application"
       }
 
-      promise.resolve("This thing does have an application" + application.currentAccount.currentAccount.authority)
+      return@Coroutine "This thing does have an application" + application.currentAccount.currentAccount.authority
     }
-    AsyncFunction("acquireTokenSilently") Coroutine { config: MSALConfig, promise: Promise ->
-      promise.resolve("Thing")
+    AsyncFunction("acquireTokenSilently") Coroutine { config: MSALConfig->
+      val context = appContext.activityProvider?.currentActivity?.window?.context
+      return@Coroutine context.toString()
     }
-    AsyncFunction("signOut") Coroutine { config: MSALConfig, promise: Promise ->
-      promise.resolve("Thing")
+    AsyncFunction("signOut") Coroutine { config: MSALConfig ->
+      val context = appContext.activityProvider?.currentActivity?.window?.context
+      return@Coroutine false
     }
   }
-  suspend fun loadApplication(config: MSALConfig): ISingleAccountPublicClientApplication? = suspendCancellableCoroutine {  continuation ->
+  private suspend fun loadApplication(config: MSALConfig): ISingleAccountPublicClientApplication? = suspendCancellableCoroutine { continuation ->
+    Log.e("EXPO_MSAL", "Thing")
     if (mSingleAccountApp != null) {
       continuation.resume(mSingleAccountApp)
       return@suspendCancellableCoroutine
@@ -80,13 +83,13 @@ class ExpoMsalModule: Module() {
       val authority: JSONObject = JSONObject()
       authority.put("type","AAD")
       authority.put("audience", audience)
-      val authoritiesJsonArr: Array<JSONObject> = arrayOf(authority)
+      val authoritiesJsonArr: JSONArray = JSONArray(arrayOf(authority).asList())
+      Log.e("EXPO_MSAL", authoritiesJsonArr.toString())
       msalConfigJsonObj.put("authorities", authoritiesJsonArr)
-
 
       // Serialize the JSON config to a string
       val serializedMsalConfig: String = msalConfigJsonObj.toString()
-
+      Log.e("EXPO_MSAL", serializedMsalConfig)
       // Create a temporary file and write the serialized config to it
       val file = File.createTempFile("RNMSAL_msal_config", ".tmp")
       file.deleteOnExit()
@@ -102,10 +105,12 @@ class ExpoMsalModule: Module() {
           }
 
           override fun onError(exception: MsalException) {
+            Log.e("EXPO_MSAL", "Error on error\n" + exception.exceptionName + "\n" + exception.localizedMessage)
             continuation.resume(null)
           }
         })
     } catch (error: Error) {
+      Log.e("EXPO_MSAL", "Error Here")
       continuation.resume(null)
     }
   }

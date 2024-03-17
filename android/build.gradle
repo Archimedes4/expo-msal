@@ -90,4 +90,7 @@ dependencies {
   implementation project(':expo-modules-core')
   implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:${getKotlinVersion()}"
   implementation ("com.microsoft.identity.client:msal:4.9.+")
+  {
+   exclude group: 'com.microsoft.device.display'
+  }
 }
