@@ -29,7 +29,7 @@
       </intent-filter>
       <intent-filter data-generated="true">
         <action android:name="android.intent.action.VIEW"/>
-        <data android:scheme="msauth" android:host="expo.modules.msal.example"/>
+        <data android:scheme="expo.modules.msal.example" android:host="auth" android:path=""/>
         <category android:name="android.intent.category.DEFAULT"/>
         <category android:name="android.intent.category.BROWSABLE"/>
       </intent-filter>

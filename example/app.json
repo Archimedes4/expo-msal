@@ -59,6 +59,7 @@
       "eas": {
         "projectId": "5b007190-f29b-4c9e-bfca-bbdcc0de7d1d"
       }
-    }
+    },
+    "plugins": [["../app.plugin.js", { "androidPackageSignatureHash": "" }]],
   }
 }
