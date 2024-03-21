@@ -17,40 +17,31 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "expo.modules.msal.example",
-      "infoPlist": {
-        "CFBundleURLTypes": [
-          {
-            "CFBundleURLSchemes": [
-              "msauth.expo.modules.msal.example"
-            ]
-          }
-        ],
-        "LSApplicationQueriesSchemes": [
-          "msauthv2",
-          "msauthv3"
-        ]
-      },
-      "entitlements": {
-        "keychain-access-groups": [
-          "com.microsoft.adalcache"
-        ]
-      }
+      // "infoPlist": {
+      //   "CFBundleURLTypes": [
+      //     {
+      //       "CFBundleURLSchemes": [
+      //         "msauth.expo.modules.msal.example"
+      //       ]
+      //     }
+      //   ],
+      //   "LSApplicationQueriesSchemes": [
+      //     "msauthv2",
+      //     "msauthv3"
+      //   ]
+      // },
+      // "entitlements": {
+      //   "keychain-access-groups": [
+      //     "com.microsoft.adalcache"
+      //   ]
+      // }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "expo.modules.msal.example",
-      "intentFilters": [{
-        "action":"VIEW",
-        "category": ["DEFAULT", "BROWSABLE"],
-        "data":{
-          "scheme": "expo.modules.msal.example",
-          "host": "auth",
-          "path":""
-        }
-      }]
+      "package": "expo.modules.msal.example"
     },
     "web": {
       "favicon": "./assets/favicon.png"

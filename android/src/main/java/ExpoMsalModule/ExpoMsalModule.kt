@@ -1,5 +1,6 @@
 package expo.modules.msal
 
+import android.content.pm.PackageManager
 import android.util.Log
 import com.microsoft.identity.client.IPublicClientApplication
 import com.microsoft.identity.client.ISingleAccountPublicClientApplication
@@ -33,6 +34,8 @@ class ExpoMsalModule: Module() {
     // Defines a JavaScript function that always returns a Promise and whose native code
     // is by default dispatched on the different thread than the JavaScript runtime runs on.
     AsyncFunction("acquireTokenInteractively") Coroutine { config: MSALConfig ->
+      val context = appContext.activityProvider.currentActivity.application.applicationInfo
+      Log.e("EXPO_MSAL", context)
       val application: ISingleAccountPublicClientApplication = loadApplication(config) ?:run {
         return@Coroutine "No Public Client Application"
       }
