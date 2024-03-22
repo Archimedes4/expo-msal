@@ -1,5 +1,4 @@
-import { Button, StyleSheet, Text, View } from 'react-native';
-
+import { Button, Platform, StyleSheet, Text, View } from 'react-native';
 import { useMSAL, ExpoMsalProvider } from 'expo-msal';
 import { useEffect, useState } from 'react';
 
@@ -9,7 +8,11 @@ export function Content() {
     clientId: '08624b03-1aa6-40c4-8fb3-149c39026dff',
     authority: 'https://login.microsoftonline.com/551df04d-543a-4d61-955e-e4294c4cf950',
     scopes: ["user.read"],
-    redirectUri: "msauth.expo.modules.msal.example://auth"
+    redirectUri: Platform.select({
+      ios: "msauth.expo.modules.msal.example://auth",
+      android: "msauth://expo.modules.msal.example",
+      default: ""
+    })
   })
   async function getToken() {
     console.log("Testing log")

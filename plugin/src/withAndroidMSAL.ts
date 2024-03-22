@@ -7,6 +7,7 @@ import {
 } from '@expo/config-plugins';
 import type { ExpoConfig } from '@expo/config-types';
 
+
 const { getMainApplicationOrThrow } = AndroidConfig.Manifest;
 
 export const withAndroidActivity: ConfigPlugin<string> = (config, signatureHash) => {
@@ -21,6 +22,7 @@ function setBrowserTabActivity(
   androidManifest: AndroidConfig.Manifest.AndroidManifest,
   signatureHash: string
 ) {
+  console.log("This thing auth")
   const BROWSER_TAB_ACTIVITY_NAME = 'com.microsoft.identity.client.BrowserTabActivity';
 
   const mainApplication = getMainApplicationOrThrow(androidManifest);
@@ -47,7 +49,13 @@ function setBrowserTabActivity(
       ],
     },
   ];
-
+  androidManifest.manifest.application?.forEach((activity) => {
+    activity.activity, activity.activity?.forEach((intent) => {
+      intent['intent-filter']?.forEach((intentFilter) => {
+        console.log(activity.activity, intentFilter.data)
+      })
+    })
+  })
   return androidManifest;
 }
 

@@ -1,10 +1,17 @@
 package expo.modules.msal
 
+import android.app.Activity
 import android.content.pm.PackageManager
 import android.util.Log
+import com.microsoft.identity.client.AcquireTokenSilentParameters
+import com.microsoft.identity.client.AuthenticationCallback
+import com.microsoft.identity.client.IAccount
+import com.microsoft.identity.client.IAuthenticationResult
 import com.microsoft.identity.client.IPublicClientApplication
 import com.microsoft.identity.client.ISingleAccountPublicClientApplication
 import com.microsoft.identity.client.PublicClientApplication
+import com.microsoft.identity.client.SignInParameters
+import com.microsoft.identity.client.SilentAuthenticationCallback
 import com.microsoft.identity.client.exception.MsalException
 import expo.modules.kotlin.Promise
 import expo.modules.kotlin.functions.Coroutine
@@ -17,11 +24,13 @@ import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
 import java.io.FileWriter
+import java.util.Arrays
 import kotlin.coroutines.resume
 
 
 class ExpoMsalModule: Module() {
   private var mSingleAccountApp: ISingleAccountPublicClientApplication? = null
+  private var mAccount: IAccount? = null
   // Each module class must implement the definition function. The definition consists of components
   // that describes the module's functionality and behavior.
   // See https://docs.expo.dev/modules/module-api for more details about available components.
@@ -34,22 +43,100 @@ class ExpoMsalModule: Module() {
     // Defines a JavaScript function that always returns a Promise and whose native code
     // is by default dispatched on the different thread than the JavaScript runtime runs on.
     AsyncFunction("acquireTokenInteractively") Coroutine { config: MSALConfig ->
-      val context = appContext.activityProvider.currentActivity.application.applicationInfo
-      Log.e("EXPO_MSAL", context)
       val application: ISingleAccountPublicClientApplication = loadApplication(config) ?:run {
         return@Coroutine "No Public Client Application"
       }
+      val activity: Activity =  appContext.activityProvider?.currentActivity ?:run {
+        return@Coroutine "No Actitivty"
+      }
 
-      return@Coroutine "This thing does have an application" + application.currentAccount.currentAccount.authority
+      val signInResult = getTokenInteractively(config, activity, application)
+
+      return@Coroutine signInResult
     }
     AsyncFunction("acquireTokenSilently") Coroutine { config: MSALConfig->
-      val context = appContext.activityProvider?.currentActivity?.window?.context
-      return@Coroutine context.toString()
+      val application: ISingleAccountPublicClientApplication = loadApplication(config) ?:run {
+        return@Coroutine "No Public Client Application"
+      }
+      val account: IAccount = loadAccount(application) ?:run {
+        return@Coroutine "No Account"
+      }
+
+      val tokenResult = getTokenSilently(config, application, account)
+
+      return@Coroutine tokenResult
     }
     AsyncFunction("signOut") Coroutine { config: MSALConfig ->
-      val context = appContext.activityProvider?.currentActivity?.window?.context
-      return@Coroutine false
+      val application: ISingleAccountPublicClientApplication = loadApplication(config) ?:run {
+        return@Coroutine false
+      }
+      val signOutResult: Boolean = signOut(application)
+      return@Coroutine signOutResult
     }
+  }
+  private suspend fun getTokenInteractively(config: MSALConfig, activity: Activity, application: ISingleAccountPublicClientApplication): String = suspendCancellableCoroutine { continuation ->
+    val signInParameters: SignInParameters = SignInParameters.builder()
+      .withActivity(activity)
+      .withLoginHint(null)
+      .withScopes(Arrays.asList(*config.scopes))
+      .withCallback(object : AuthenticationCallback {
+        override fun onSuccess(authenticationResult: IAuthenticationResult) {
+          /* Successfully got a token, use it to call a protected resource - MSGraph */
+          continuation.resume(authenticationResult.accessToken)
+        }
+
+        override fun onError(exception: MsalException) {
+          continuation.resume("Error")
+        }
+
+        override fun onCancel() {
+          continuation.resume("Cancel")
+        }
+      })
+      .build()
+    application.signIn(signInParameters)
+  }
+  private suspend fun loadAccount(application: ISingleAccountPublicClientApplication): IAccount? = suspendCancellableCoroutine { continuation ->
+    if (mAccount !== null) {
+      continuation.resume(mAccount)
+      return@suspendCancellableCoroutine
+    }
+    application.getCurrentAccountAsync(object :
+      ISingleAccountPublicClientApplication.CurrentAccountCallback {
+        override fun onAccountLoaded(activeAccount: IAccount?) {
+          // You can use the account data to update your UI or your app database.
+          mAccount = activeAccount
+          continuation.resume(activeAccount)
+        }
+
+        override fun onAccountChanged(priorAccount: IAccount?, currentAccount: IAccount?) {
+          if (currentAccount == null) {
+            // Perform a cleanup task as the signed-in account changed.
+            mAccount = null
+          }
+        }
+
+        override fun onError(exception: MsalException) {
+          continuation.resume(null)
+        }
+    })
+  }
+  private suspend fun getTokenSilently(config: MSALConfig, application: ISingleAccountPublicClientApplication, account: IAccount): String = suspendCancellableCoroutine { continuation ->
+    val silentParameters = AcquireTokenSilentParameters.Builder()
+      .fromAuthority(account.authority)
+      .forAccount(account)
+      .withScopes(Arrays.asList(*config.scopes))
+      .withCallback(object : SilentAuthenticationCallback {
+        override fun onSuccess(authenticationResult: IAuthenticationResult) {
+          continuation.resume(authenticationResult.accessToken)
+        }
+
+        override fun onError(exception: MsalException) {
+          continuation.resume("Error")
+        }
+      })
+      .build()
+    application.acquireTokenSilentAsync(silentParameters)
   }
   private suspend fun loadApplication(config: MSALConfig): ISingleAccountPublicClientApplication? = suspendCancellableCoroutine { continuation ->
     Log.e("EXPO_MSAL", "Thing")
@@ -80,6 +167,8 @@ class ExpoMsalModule: Module() {
         config.redirectUri
       )
 
+      msalConfigJsonObj.put("authorization_user_agent", "WEBVIEW")
+
 
       val audience: JSONObject = JSONObject()
       audience.put("type", "AzureADMultipleOrgs")
@@ -104,6 +193,7 @@ class ExpoMsalModule: Module() {
         file,
         object : IPublicClientApplication.ISingleAccountApplicationCreatedListener {
           override fun onCreated(application: ISingleAccountPublicClientApplication) {
+            Log.e("EXPO_MSAL", "Application created" + application.configuration.clientId)
             continuation.resume(application)
           }
 
@@ -116,6 +206,19 @@ class ExpoMsalModule: Module() {
       Log.e("EXPO_MSAL", "Error Here")
       continuation.resume(null)
     }
+    Log.e("EXPO_MSAL", "End reached")
+  }
+  private suspend fun signOut(application: ISingleAccountPublicClientApplication): Boolean = suspendCancellableCoroutine { continuation ->
+    application.signOut(object : ISingleAccountPublicClientApplication.SignOutCallback {
+      override fun onSignOut() {
+        mAccount = null
+        continuation.resume(true)
+      }
+
+      override fun onError(exception: MsalException) {
+        continuation.resume(false)
+      }
+    })
   }
 }
 

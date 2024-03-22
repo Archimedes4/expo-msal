@@ -1,5 +1,5 @@
 
-import { ConfigPlugin, withInfoPlist, withEntitlementsPlist, withPlugins, withAppDelegate } from '@expo/config-plugins';
+import { ConfigPlugin, withInfoPlist, withEntitlementsPlist, withPlugins} from '@expo/config-plugins';
 
 const withIosUrlScheme: ConfigPlugin = (config) => {
   if (!config.ios?.bundleIdentifier) {

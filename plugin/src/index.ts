@@ -1,8 +1,8 @@
 // Taken from https://github.com/stashenergy/react-native-msal/tree/master/plugin
 import { ConfigPlugin, withPlugins } from '@expo/config-plugins';
 
-import { withAndroidMSAL } from './withAndroidMSAL';
 import { withIosMSAL } from './withiOSMSAL';
+import { withAndroidMSAL } from './withAndroidMSAL';
 
 const withReactNativeMSAL: ConfigPlugin<{ androidPackageSignatureHash: string }> = (
   config,

@@ -27,12 +27,23 @@
       <dict>
         <key>CFBundleURLSchemes</key>
         <array>
+          <string>msauth.expo.modules.msal.example</string>
+        </array>
+      </dict>
+      <dict>
+        <key>CFBundleURLSchemes</key>
+        <array>
           <string>expo.modules.msal.example</string>
         </array>
       </dict>
     </array>
     <key>CFBundleVersion</key>
     <string>1</string>
+    <key>LSApplicationQueriesSchemes</key>
+    <array>
+      <string>msauthv2</string>
+      <string>msauthv3</string>
+    </array>
     <key>LSRequiresIPhoneOS</key>
     <true/>
     <key>NSAppTransportSecurity</key>

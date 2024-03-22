@@ -1,5 +1,5 @@
 {
-  "name": "expo-msal",
+  "name": "@archimedes4/expo-msal",
   "version": "0.1.0",
   "description": "MSAL auth",
   "main": "build/index.js",
@@ -21,11 +21,14 @@
     "expo-msal",
     "ExpoMsal"
   ],
-  "repository": "https://github.com/dashboard",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dashboard"
+  },
   "bugs": {
     "url": "https://github.com/dashboard/issues"
   },
-  "author": "Archimedes4 <82121191+AMCanada16@users.noreply.github.com> ()",
+  "author": "Archimedes4 <82121191+AMCanada16@users.noreply.github.com>",
   "license": "MIT",
   "homepage": "https://github.com/dashboard#readme",
   "dependencies": {
@@ -45,5 +48,8 @@
     "expo": "*",
     "react": "*",
     "react-native": "*"
+  },
+  "directories": {
+    "example": "example"
   }
 }

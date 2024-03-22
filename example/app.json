@@ -16,25 +16,7 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "expo.modules.msal.example",
-      // "infoPlist": {
-      //   "CFBundleURLTypes": [
-      //     {
-      //       "CFBundleURLSchemes": [
-      //         "msauth.expo.modules.msal.example"
-      //       ]
-      //     }
-      //   ],
-      //   "LSApplicationQueriesSchemes": [
-      //     "msauthv2",
-      //     "msauthv3"
-      //   ]
-      // },
-      // "entitlements": {
-      //   "keychain-access-groups": [
-      //     "com.microsoft.adalcache"
-      //   ]
-      // }
+      "bundleIdentifier": "expo.modules.msal.example"
     },
     "android": {
       "adaptiveIcon": {
@@ -51,6 +33,13 @@
         "projectId": "5b007190-f29b-4c9e-bfca-bbdcc0de7d1d"
       }
     },
-    "plugins": [["../app.plugin.js", { "androidPackageSignatureHash": "" }]],
+    "plugins": [
+      [
+        "../app.plugin.js",
+        {
+          "androidPackageSignatureHash": ""
+        }
+      ]
+    ]
   }
 }
