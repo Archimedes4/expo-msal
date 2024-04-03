@@ -1,6 +1,5 @@
 {
   "name": "@archimedes4/expo-msal",
-  "version": "0.1.0",
   "description": "MSAL auth",
   "main": "build/index.js",
   "types": "build/index.d.ts",
