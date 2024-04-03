@@ -22,7 +22,7 @@ export default {
       instance.setActiveAccount(redirectResult.account);
       return redirectResult.accessToken
     }
-    if (inProgress !== InteractionStatus.None) {
+    if (inProgress !== InteractionStatus.None && inProgress !== InteractionStatus.Startup) {
       return "Error"
     }
     // checking if an account exists
