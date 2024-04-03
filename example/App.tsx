@@ -1,4 +1,4 @@
-import { Button, Platform, StyleSheet, Text, View } from 'react-native';
+import { Button, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useMSAL, ExpoMsalProvider } from 'expo-msal';
 import { useEffect, useState } from 'react';
 
@@ -15,17 +15,14 @@ export function Content() {
     })
   })
   async function getToken() {
-    console.log("Testing log")
     setToken(await MSAL.acquireTokenSilently())
   }
   async function getTokenInter() {
     setToken("This is updated 1")
-    console.log("Testing log")
     // On native retuns value, web no value to be returned
     setToken(await MSAL.acquireTokenInteractively())
   }
   async function signOut() {
-    console.log("Testing log")
     // On native retuns value, web no value to be returned
     console.log(await MSAL.signOut())
   }
@@ -34,12 +31,14 @@ export function Content() {
     getToken()
   }, [])
   return (
-    <View style={styles.container}>
+    <ScrollView>
+      <View style={styles.container}>
       <Text style={{color: "white"}}>{token}</Text>
       <Button title='Login' onPress={() => {getTokenInter()}}/>
       <Button title='Get Silent' onPress={() => {getToken()}}/>
       <Button title='Logout' onPress={() => {signOut()}}/>
-    </View>
+      </View>
+    </ScrollView>
   )
 }
 

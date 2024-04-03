@@ -12,7 +12,6 @@ export function useMSAL(config: ExpoMsalConfig): {
     return await ExpoMsalModule.acquireTokenSilently(config)
   }
   async function acquireTokenInteractively() {
-    console.log("INTERACTIVLY")
     return await ExpoMsalModule.acquireTokenInteractively(config)
   }
   async function signOut() {

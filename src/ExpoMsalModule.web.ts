@@ -4,7 +4,6 @@ import { ExpoMsalConfig } from "./ExpoMsal.types";
 export default {
   async acquireTokenInteractively(config: ExpoMsalConfig, instance: IPublicClientApplication, inProgress: InteractionStatus): Promise<undefined> {
     if (inProgress !== InteractionStatus.None) {
-      console.log(inProgress)
       return
     }
     instance.loginRedirect({

@@ -43,7 +43,7 @@ public class ExpoMsalModule: Module {
             } else {
                 promise.resolve("Error")
             }
-        }
+        }.runOnQueue(.main)
         AsyncFunction("acquireTokenSilently") { (config: MSALConfig, promise: Promise) in
             if (applicationContext === nil) {
                 loadApplication(config: config)
@@ -68,7 +68,7 @@ public class ExpoMsalModule: Module {
                     }
                 }
             })
-        }
+        }.runOnQueue(.main)
         AsyncFunction("signOut") { (config: MSALConfig, promise: Promise) in
             if (applicationContext === nil) {
                 loadApplication(config: config)
@@ -98,7 +98,7 @@ public class ExpoMsalModule: Module {
             } else {
                 promise.resolve(false)
             }
-        }
+        }.runOnQueue(.main)
     }
     
     func loadApplication(config: MSALConfig) {

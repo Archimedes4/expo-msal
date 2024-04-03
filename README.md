@@ -16,26 +16,6 @@ For bare React Native projects, you must ensure that you have [installed and con
 npm install expo-msal
 ```
 
-### Configure for iOS
-
-Configure info Plist and entitlments. Add the code below to app.json. Note: change the value of CFBundleURLSchemes to `msauth.your-bundle-identitifer`.
-```
-  "infoPlist": {
-    "CFBundleURLTypes": [{
-      "CFBundleURLSchemes":["msauth.expo.modules.msal.example"]
-    }],
-    "LSApplicationQueriesSchemes":["msauthv2", "msauthv3"]
-  },
-  "entitlements": {
-    "keychain-access-groups": ["com.microsoft.adalcache"]
-  }
-```
-
-
-### Configure for Android
-
-Add your intent filters
-
 ### Configure ClientId and tenantId in env
 add EXPO_PUBLIC_CLIENTID this is needed for web implimentation. The clientId is what is passed to the public client application
 
