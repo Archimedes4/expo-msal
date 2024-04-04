@@ -10,6 +10,7 @@ export default {
       scopes: config.scopes,
       redirectUri: `${window.location.protocol}//${window.location.host}/`,
     });
+    return
   },
   async acquireTokenSilently(config: ExpoMsalConfig, instance: IPublicClientApplication, inProgress: InteractionStatus): Promise<string> {
     // handle auth redired/do all initial setup for msal
