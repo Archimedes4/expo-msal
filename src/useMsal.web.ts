@@ -1,12 +1,12 @@
 // Import the native module. On web, it will be resolved to ExpoMsal.web.ts
 // and on native platforms to ExpoMsal.ts
 import { useMsal } from '@azure/msal-react';
-import { ExpoMsalConfig } from './ExpoMsal.types';
+import { ExpoMsalConfig, TokenResult } from './ExpoMsal.types';
 import ExpoMsalModule from './ExpoMsalModule';
 
 export function useMSAL(config: ExpoMsalConfig): {
-  acquireTokenSilently: () => Promise<string>,
-  acquireTokenInteractively: () => Promise<string>,
+  acquireTokenSilently: () => Promise<TokenResult>,
+  acquireTokenInteractively: () => Promise<TokenResult>,
   signOut: () => Promise<boolean> 
 } {
   const { instance, inProgress } = useMsal();

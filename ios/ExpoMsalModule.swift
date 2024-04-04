@@ -19,7 +19,7 @@ public class ExpoMsalModule: Module {
                 loadApplication(config: config)
             }
             guard let applicationContext = self.applicationContext else {
-                promise.resolve("Error")
+                promise.resolve(TokenResult(result: ResultState.error.rawValue, data: "No Application"))
                 return
             }
             let keyWindow = UIApplication.shared.windows.filter {$0.isKeyWindow}.first
@@ -34,14 +34,18 @@ public class ExpoMsalModule: Module {
                 
                 applicationContext.acquireToken(with: parameters) { (result, error) in
                     guard let result = result else {
-                        promise.resolve("Error")
+                        guard let error = error else {
+                            promise.resolve(TokenResult(result: ResultState.error.rawValue, data: "Something went wrong, no error produced."))
+                            return
+                        }
+                        promise.resolve(TokenResult(result: ResultState.error.rawValue, data: error.localizedDescription))
                         return
                     }
                     
-                    promise.resolve(result.accessToken)
+                    promise.resolve(TokenResult(result: ResultState.success.rawValue, data: result.accessToken))
                 }
             } else {
-                promise.resolve("Error")
+                promise.resolve(TokenResult(result: ResultState.error.rawValue, data: "Could not find root view controller"))
             }
         }.runOnQueue(.main)
         AsyncFunction("acquireTokenSilently") { (config: MSALConfig, promise: Promise) in
@@ -49,7 +53,7 @@ public class ExpoMsalModule: Module {
                 loadApplication(config: config)
             }
             guard let applicationContext = self.applicationContext else {
-                promise.resolve("Error")
+                promise.resolve(TokenResult(result: ResultState.error.rawValue, data: "No Application"))
                 return
             }
             let msalParameters = MSALParameters()
@@ -57,15 +61,20 @@ public class ExpoMsalModule: Module {
             applicationContext.getCurrentAccount(with: msalParameters, completionBlock: { (currentAccount, previousAccount, error) in
                 if let currentAccount = currentAccount {
                     let parameters = MSALSilentTokenParameters(scopes: config.scopes, account: currentAccount)
-                    
                     applicationContext.acquireTokenSilent(with: parameters) { (result, error) in
                         guard let result = result else {
-                            promise.resolve("Error")
+                            guard let error = error else {
+                                promise.resolve(TokenResult(result: ResultState.error.rawValue, data: "Something went wrong, no error produced."))
+                                return
+                            }
+                            promise.resolve(TokenResult(result: ResultState.error.rawValue, data: error.localizedDescription))
                             return
                         }
-                        promise.resolve(result.accessToken)
+                        promise.resolve(TokenResult(result: ResultState.success.rawValue, data: result.accessToken))
                         return
                     }
+                } else {
+                  promise.resolve(TokenResult(result: ResultState.error.rawValue, data: "No Token Has been found"))
                 }
             })
         }.runOnQueue(.main)
@@ -120,11 +129,23 @@ public class ExpoMsalModule: Module {
 
 struct MSALConfig: Record {
     @Field
-    var clientId: String;
+    var clientId: String = "";
     @Field
-    var scopes: [String];
+    var scopes: [String] = [];
     @Field
-    var authority: String;
+    var authority: String = "";
     @Field
-    var redirectUri: String;
+    var redirectUri: String = "";
+}
+
+enum ResultState: Int, Enumerable {
+    case success = 0
+    case error = 1
+}
+
+struct TokenResult: Record {
+    @Field
+    var result: Int = 1;
+    @Field
+    var data: String = "";
 }

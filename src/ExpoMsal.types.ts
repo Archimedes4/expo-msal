@@ -8,3 +8,13 @@ export type ExpoMsalConfig = {
   authority: string;
   redirectUri: string;
 };
+
+export enum ResultState {
+  success,
+  error
+}
+
+export type TokenResult = {
+  result: ResultState,
+  data: string //Error or token
+}

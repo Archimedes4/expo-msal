@@ -1,8 +1,6 @@
 package expo.modules.msal
 
 import android.app.Activity
-import android.content.pm.PackageManager
-import android.util.Log
 import com.microsoft.identity.client.AcquireTokenSilentParameters
 import com.microsoft.identity.client.AuthenticationCallback
 import com.microsoft.identity.client.IAccount
@@ -13,7 +11,6 @@ import com.microsoft.identity.client.PublicClientApplication
 import com.microsoft.identity.client.SignInParameters
 import com.microsoft.identity.client.SilentAuthenticationCallback
 import com.microsoft.identity.client.exception.MsalException
-import expo.modules.kotlin.Promise
 import expo.modules.kotlin.functions.Coroutine
 import expo.modules.kotlin.modules.Module
 import expo.modules.kotlin.modules.ModuleDefinition
@@ -43,38 +40,33 @@ class ExpoMsalModule: Module() {
     // Defines a JavaScript function that always returns a Promise and whose native code
     // is by default dispatched on the different thread than the JavaScript runtime runs on.
     AsyncFunction("acquireTokenInteractively") Coroutine { config: MSALConfig ->
-      val application: ISingleAccountPublicClientApplication = loadApplication(config) ?:run {
-        return@Coroutine "No Public Client Application"
+      val application: ISingleAccountPublicClientApplication = loadApplication(config) ?: run {
+        return@Coroutine TokenResult(result = 1, data = "No Public Client Application")
       }
-      val activity: Activity =  appContext.activityProvider?.currentActivity ?:run {
-        return@Coroutine "No Actitivty"
+      val activity: Activity = appContext.activityProvider?.currentActivity ?: run {
+        return@Coroutine TokenResult(result = 1, data = "No Actitivty")
       }
 
-      val signInResult = getTokenInteractively(config, activity, application)
-
-      return@Coroutine signInResult
+      return@Coroutine getTokenInteractively(config, activity, application)
     }
-    AsyncFunction("acquireTokenSilently") Coroutine { config: MSALConfig->
-      val application: ISingleAccountPublicClientApplication = loadApplication(config) ?:run {
-        return@Coroutine "No Public Client Application"
+    AsyncFunction("acquireTokenSilently") Coroutine { config: MSALConfig ->
+      val application: ISingleAccountPublicClientApplication = loadApplication(config) ?: run {
+        return@Coroutine TokenResult(result = 1, data = "No Public Client Application")
       }
-      val account: IAccount = loadAccount(application) ?:run {
-        return@Coroutine "No Account"
+      val account: IAccount = loadAccount(application) ?: run {
+        return@Coroutine TokenResult(result = 1, data = "No Account")
       }
 
-      val tokenResult = getTokenSilently(config, application, account)
-
-      return@Coroutine tokenResult
+      return@Coroutine getTokenSilently(config, application, account)
     }
     AsyncFunction("signOut") Coroutine { config: MSALConfig ->
-      val application: ISingleAccountPublicClientApplication = loadApplication(config) ?:run {
+      val application: ISingleAccountPublicClientApplication = loadApplication(config) ?: run {
         return@Coroutine false
       }
-      val signOutResult: Boolean = signOut(application)
-      return@Coroutine signOutResult
+      return@Coroutine signOut(application)
     }
   }
-  private suspend fun getTokenInteractively(config: MSALConfig, activity: Activity, application: ISingleAccountPublicClientApplication): String = suspendCancellableCoroutine { continuation ->
+  private suspend fun getTokenInteractively(config: MSALConfig, activity: Activity, application: ISingleAccountPublicClientApplication): TokenResult = suspendCancellableCoroutine { continuation ->
     val signInParameters: SignInParameters = SignInParameters.builder()
       .withActivity(activity)
       .withLoginHint(null)
@@ -82,15 +74,15 @@ class ExpoMsalModule: Module() {
       .withCallback(object : AuthenticationCallback {
         override fun onSuccess(authenticationResult: IAuthenticationResult) {
           /* Successfully got a token, use it to call a protected resource - MSGraph */
-          continuation.resume(authenticationResult.accessToken)
+          continuation.resume(TokenResult(result = 0, data = authenticationResult.accessToken))
         }
 
         override fun onError(exception: MsalException) {
-          continuation.resume("Error")
+          continuation.resume(TokenResult(result = 1, data = (exception.localizedMessage ?: "Something went wrong!")))
         }
 
         override fun onCancel() {
-          continuation.resume("Cancel")
+          continuation.resume(TokenResult(result = 1, data = "Canceled"))
         }
       })
       .build()
@@ -121,25 +113,24 @@ class ExpoMsalModule: Module() {
         }
     })
   }
-  private suspend fun getTokenSilently(config: MSALConfig, application: ISingleAccountPublicClientApplication, account: IAccount): String = suspendCancellableCoroutine { continuation ->
+  private suspend fun getTokenSilently(config: MSALConfig, application: ISingleAccountPublicClientApplication, account: IAccount): TokenResult = suspendCancellableCoroutine { continuation ->
     val silentParameters = AcquireTokenSilentParameters.Builder()
       .fromAuthority(account.authority)
       .forAccount(account)
-      .withScopes(Arrays.asList(*config.scopes))
+      .withScopes(listOf(*config.scopes))
       .withCallback(object : SilentAuthenticationCallback {
         override fun onSuccess(authenticationResult: IAuthenticationResult) {
-          continuation.resume(authenticationResult.accessToken)
+          continuation.resume(TokenResult(result = 0, data = authenticationResult.accessToken))
         }
 
         override fun onError(exception: MsalException) {
-          continuation.resume("Error")
+          continuation.resume(TokenResult(result = 1, data = (exception.localizedMessage ?: "Something went wrong!")))
         }
       })
       .build()
     application.acquireTokenSilentAsync(silentParameters)
   }
   private suspend fun loadApplication(config: MSALConfig): ISingleAccountPublicClientApplication? = suspendCancellableCoroutine { continuation ->
-    Log.e("EXPO_MSAL", "Thing")
     if (mSingleAccountApp != null) {
       continuation.resume(mSingleAccountApp)
       return@suspendCancellableCoroutine
@@ -176,12 +167,10 @@ class ExpoMsalModule: Module() {
       authority.put("type","AAD")
       authority.put("audience", audience)
       val authoritiesJsonArr: JSONArray = JSONArray(arrayOf(authority).asList())
-      Log.e("EXPO_MSAL", authoritiesJsonArr.toString())
       msalConfigJsonObj.put("authorities", authoritiesJsonArr)
 
       // Serialize the JSON config to a string
       val serializedMsalConfig: String = msalConfigJsonObj.toString()
-      Log.e("EXPO_MSAL", serializedMsalConfig)
       // Create a temporary file and write the serialized config to it
       val file = File.createTempFile("RNMSAL_msal_config", ".tmp")
       file.deleteOnExit()
@@ -193,20 +182,16 @@ class ExpoMsalModule: Module() {
         file,
         object : IPublicClientApplication.ISingleAccountApplicationCreatedListener {
           override fun onCreated(application: ISingleAccountPublicClientApplication) {
-            Log.e("EXPO_MSAL", "Application created" + application.configuration.clientId)
             continuation.resume(application)
           }
 
           override fun onError(exception: MsalException) {
-            Log.e("EXPO_MSAL", "Error on error\n" + exception.exceptionName + "\n" + exception.localizedMessage)
             continuation.resume(null)
           }
         })
     } catch (error: Error) {
-      Log.e("EXPO_MSAL", "Error Here")
       continuation.resume(null)
     }
-    Log.e("EXPO_MSAL", "End reached")
   }
   private suspend fun signOut(application: ISingleAccountPublicClientApplication): Boolean = suspendCancellableCoroutine { continuation ->
     application.signOut(object : ISingleAccountPublicClientApplication.SignOutCallback {
@@ -232,3 +217,9 @@ class MSALConfig: Record {
   @Field
   var redirectUri: String = ""
 }
+
+// 0 success 1 error
+class TokenResult(
+  @Field var result: Int = 1,
+  @Field var data: String = ""
+): Record

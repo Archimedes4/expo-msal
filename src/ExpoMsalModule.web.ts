@@ -1,5 +1,5 @@
 import { IPublicClientApplication, InteractionStatus } from "@azure/msal-browser";
-import { ExpoMsalConfig } from "./ExpoMsal.types";
+import { ExpoMsalConfig, ResultState, TokenResult } from "./ExpoMsal.types";
 
 export default {
   async acquireTokenInteractively(config: ExpoMsalConfig, instance: IPublicClientApplication, inProgress: InteractionStatus): Promise<undefined> {
@@ -12,7 +12,7 @@ export default {
     });
     return
   },
-  async acquireTokenSilently(config: ExpoMsalConfig, instance: IPublicClientApplication, inProgress: InteractionStatus): Promise<string> {
+  async acquireTokenSilently(config: ExpoMsalConfig, instance: IPublicClientApplication, inProgress: InteractionStatus): Promise<TokenResult> {
     // handle auth redired/do all initial setup for msal
     const redirectResult = await instance.handleRedirectPromise();
     if (
@@ -21,10 +21,16 @@ export default {
       redirectResult.account !== null
     ) {
       instance.setActiveAccount(redirectResult.account);
-      return redirectResult.accessToken
+      return {
+        result: ResultState.success,
+        data: redirectResult.accessToken
+      }
     }
     if (inProgress !== InteractionStatus.None && inProgress !== InteractionStatus.Startup) {
-      return "Error"
+      return {
+        result: ResultState.error,
+        data: "Interaction state not ready"
+      }
     }
     // checking if an account exists
     const accounts = instance.getAllAccounts();
@@ -36,10 +42,16 @@ export default {
         const result = await instance.acquireTokenSilent({
           scopes: config.scopes,
         });
-        return result.accessToken
+        return {
+          result: ResultState.success,
+          data: result.accessToken
+        }
       }
     }
-    return "Error"
+    return {
+      result: ResultState.error,
+      data: "No Token Has been found"
+    }
   },
   async signOut(instance: IPublicClientApplication, inProgress: InteractionStatus): Promise<boolean> {
     if (inProgress !== InteractionStatus.None) {

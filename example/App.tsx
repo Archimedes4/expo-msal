@@ -15,12 +15,15 @@ export function Content() {
     })
   })
   async function getToken() {
-    setToken(await MSAL.acquireTokenSilently())
+    let result = await MSAL.acquireTokenSilently()
+    console.log(result.data)
+    console.log(result.result)
+    setToken(result.data)
   }
   async function getTokenInter() {
     setToken("This is updated 1")
     // On native retuns value, web no value to be returned
-    setToken(await MSAL.acquireTokenInteractively())
+    setToken((await MSAL.acquireTokenInteractively()).data)
   }
   async function signOut() {
     // On native retuns value, web no value to be returned
