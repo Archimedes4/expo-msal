@@ -28,8 +28,6 @@ const withIosKeychainGroup: ConfigPlugin = (config) => {
   });
 };
 
-
-
 export const withIosMSAL: ConfigPlugin = (config) => {
   return withPlugins(config, [withIosUrlScheme, withIosKeychainGroup]);
 };
