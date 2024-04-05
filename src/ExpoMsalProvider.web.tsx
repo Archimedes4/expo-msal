@@ -11,20 +11,18 @@ function getRedirectUri() {
   return '';
 }
 
-// This is for the microsoft authentication on web.
-const pca = new PublicClientApplication({
-  auth: {
-    clientId: process.env.EXPO_PUBLIC_CLIENTID
-      ? process.env.EXPO_PUBLIC_CLIENTID
-      : '',
-    authority: `https://login.microsoftonline.com/${process.env.EXPO_PUBLIC_TENANTID}/`,
-    redirectUri: getRedirectUri(), // to stop node js error
-    navigateToLoginRequestUrl: true,
-  },
-});
-
-export default function ExpoMsalProvider({children}:{children: ReactNode}) {
+export default function ExpoMsalProvider({children, clientId, tenantId}:{children: ReactNode, clientId: string, tenantId?: string}) {
   const [mounted, setMounted] = useState(false);
+
+  // This is for the microsoft authentication on web.
+  const pca = new PublicClientApplication({
+    auth: {
+      clientId: clientId,
+      authority: `https://login.microsoftonline.com/${tenantId ? tenantId: "common"}/`,
+      redirectUri: getRedirectUri(), // to stop node js error
+      navigateToLoginRequestUrl: true,
+    },
+  });
 
   async function initialize() {
     await pca.initialize();
