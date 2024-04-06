@@ -1,8 +1,11 @@
 import { Button, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useMSAL, ExpoMsalProvider } from 'expo-msal';
 import { useEffect, useState } from 'react';
+import {useWindowDimensions} from 'react-native';
 
-export function Content() {
+
+export default function MainComp({isAuth}:{isAuth: boolean}) {
+  const {height, width} = useWindowDimensions();
   const [token, setToken] = useState<string>("NO TOKEN")
   const MSAL = useMSAL({
     clientId: '08624b03-1aa6-40c4-8fb3-149c39026dff',
@@ -31,33 +34,28 @@ export function Content() {
   }
 
   useEffect(() => {
+    console.log(height)
     getToken()
   }, [])
   return (
-    <ScrollView>
-      <View style={styles.container}>
-      <Text style={{color: "white"}}>{token}</Text>
-      <Button title='Login' onPress={() => {getTokenInter()}}/>
-      <Button title='Get Silent' onPress={() => {getToken()}}/>
-      <Button title='Logout' onPress={() => {signOut()}}/>
+    <ScrollView style={{height, width, backgroundColor: "black"}}>
+      <View style={[styles.container, {height, width}]}>
+        {isAuth ?
+         <Text style={{color: "white"}}>This is auth tab</Text>:null
+        }
+        <Text style={{color: "white"}}>{token}</Text>
+        <Button title='Login' onPress={() => {getTokenInter()}}/>
+        <Button title='Get Silent' onPress={() => {getToken()}}/>
+        <Button title='Logout' onPress={() => {signOut()}}/>
       </View>
     </ScrollView>
   )
 }
-
-export default function App() {
-  return (
-    <ExpoMsalProvider clientId={'08624b03-1aa6-40c4-8fb3-149c39026dff'} tenantId='551df04d-543a-4d61-955e-e4294c4cf950'>
-      <Content />
-    </ExpoMsalProvider>
-  );
-}
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: 'black',
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'center'
   },
 });

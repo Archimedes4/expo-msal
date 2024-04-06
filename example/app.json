@@ -6,6 +6,7 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
+    "scheme":"expo.modules.msal.example",
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
@@ -26,7 +27,9 @@
       "package": "expo.modules.msal.example"
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
+      
     },
     "extra": {
       "eas": {
@@ -39,7 +42,8 @@
         {
           "androidPackageSignatureHash": ""
         }
-      ]
+      ],
+      "expo-router"
     ]
   }
 }

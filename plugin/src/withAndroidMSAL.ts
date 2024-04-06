@@ -22,7 +22,6 @@ function setBrowserTabActivity(
   androidManifest: AndroidConfig.Manifest.AndroidManifest,
   signatureHash: string
 ) {
-  console.log("This thing auth")
   const BROWSER_TAB_ACTIVITY_NAME = 'com.microsoft.identity.client.BrowserTabActivity';
 
   const mainApplication = getMainApplicationOrThrow(androidManifest);
