@@ -9,6 +9,7 @@ export default {
     instance.loginRedirect({
       scopes: config.scopes,
       redirectUri: `${window.location.protocol}//${window.location.host}/`,
+      redirectStartPage: config.redirectUri
     });
     return
   },
