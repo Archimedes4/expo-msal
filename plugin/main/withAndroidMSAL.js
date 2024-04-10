@@ -11,7 +11,6 @@ const withAndroidActivity = (config, signatureHash) => {
 };
 exports.withAndroidActivity = withAndroidActivity;
 function setBrowserTabActivity(config, androidManifest, signatureHash) {
-    console.log("This thing auth");
     const BROWSER_TAB_ACTIVITY_NAME = 'com.microsoft.identity.client.BrowserTabActivity';
     const mainApplication = getMainApplicationOrThrow(androidManifest);
     let activity = mainApplication.activity?.find((a) => a.$['android:name'] === BROWSER_TAB_ACTIVITY_NAME);
