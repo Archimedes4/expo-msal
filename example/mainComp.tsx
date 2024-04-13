@@ -1,5 +1,5 @@
 import { Button, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { useMSAL, ExpoMsalProvider } from 'expo-msal';
+import { useMSAL, ExpoMsalProvider, ResultState } from 'expo-msal';
 import { useEffect, useState } from 'react';
 import {useWindowDimensions} from 'react-native';
 
@@ -19,17 +19,21 @@ export default function MainComp({isAuth}:{isAuth: boolean}) {
   })
   async function getToken() {
     let result = await MSAL.acquireTokenSilently()
-    console.log(result.data)
-    console.log(result.result)
-    setToken(result.data)
+    if (result !== undefined && result.result === ResultState.success) {
+      setToken(result.data) 
+    }
   }
   async function getTokenInter() {
     setToken("This is updated 1")
     // On native retuns value, web no value to be returned
-    setToken((await MSAL.acquireTokenInteractively()).data)
+    const result = await MSAL.acquireTokenInteractively()
+    if (result !== undefined && result.result === ResultState.success) {
+      setToken(result.data)
+    }
   }
   async function signOut() {
     // On native retuns value, web no value to be returned
+    setToken("")
     console.log(await MSAL.signOut())
   }
 

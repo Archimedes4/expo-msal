@@ -9,6 +9,10 @@ export type ExpoMsalConfig = {
   redirectUri: string;
 };
 
+export type ExpoFunctionConfig = {
+  scopes: string[]
+}
+
 export enum ResultState {
   success,
   error
