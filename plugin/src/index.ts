@@ -4,7 +4,7 @@ import { ConfigPlugin, withPlugins } from '@expo/config-plugins';
 import { withIosMSAL } from './withiOSMSAL';
 import { withAndroidMSAL } from './withAndroidMSAL';
 
-const withReactNativeMSAL: ConfigPlugin<{ androidPackageSignatureHash: string, clientId: string, tenantId: string }> = (
+const withReactNativeMSAL: ConfigPlugin<{ androidPackageSignatureHash: string }> = (
   config,
   { androidPackageSignatureHash }
 ) => {

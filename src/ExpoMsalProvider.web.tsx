@@ -25,8 +25,8 @@ export default function ExpoMsalProvider({children, clientId, tenantId}:{childre
         navigateToLoginRequestUrl: true
       },
     });
-    setPca(pca)
     await pca.initialize();
+    setPca(pca)
   }
 
   useEffect(() => {
