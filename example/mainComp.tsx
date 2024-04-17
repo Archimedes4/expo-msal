@@ -8,7 +8,7 @@ export default function MainComp({isAuth}:{isAuth: boolean}) {
   const {height, width} = useWindowDimensions();
   const [token, setToken] = useState<string>("NO TOKEN")
   const MSAL = useMSAL({
-    clientId: '08624b03-1aa6-40c4-8fb3-149c39026dff',
+    clientId: 'd585b96d-aa24-4276-9d4f-a3538789a10e',
     authority: 'https://login.microsoftonline.com/551df04d-543a-4d61-955e-e4294c4cf950',
     scopes: ["user.read"],
     redirectUri: Platform.select({
@@ -27,6 +27,7 @@ export default function MainComp({isAuth}:{isAuth: boolean}) {
     setToken("This is updated 1")
     // On native retuns value, web no value to be returned
     const result = await MSAL.acquireTokenInteractively()
+    console.log("HERE", result)
     if (result !== undefined && result.result === ResultState.success) {
       setToken(result.data)
     }
@@ -38,7 +39,6 @@ export default function MainComp({isAuth}:{isAuth: boolean}) {
   }
 
   useEffect(() => {
-    console.log(height)
     getToken()
   }, [])
   return (

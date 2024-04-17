@@ -1,6 +1,6 @@
 import { IPublicClientApplication, PublicClientApplication } from "@azure/msal-browser";
 import { MsalProvider } from "@azure/msal-react";
-import { ReactNode, useEffect, useState } from "react";
+import { ReactNode, useEffect, useRef } from "react";
 
 // stop redirect error
 function getRedirectUri() {
@@ -13,11 +13,11 @@ function getRedirectUri() {
 
 
 export default function ExpoMsalProvider({children, clientId, tenantId}:{children: ReactNode, clientId: string, tenantId?: string}) {
-  const [pca, setPca] = useState<IPublicClientApplication | undefined>(undefined)
+  const pca = useRef<IPublicClientApplication | undefined>(undefined)
 
   async function initialize() {
     // This is for the microsoft authentication on web.
-    const pca = new PublicClientApplication({
+    const newPca = new PublicClientApplication({
       auth: {
         clientId: clientId,
         authority: `https://login.microsoftonline.com/${tenantId ? tenantId :"common"}/`,
@@ -25,8 +25,8 @@ export default function ExpoMsalProvider({children, clientId, tenantId}:{childre
         navigateToLoginRequestUrl: true
       },
     });
-    await pca.initialize();
-    setPca(pca)
+    pca.current = newPca
+    await pca.current.initialize();
   }
 
   useEffect(() => {
@@ -34,12 +34,12 @@ export default function ExpoMsalProvider({children, clientId, tenantId}:{childre
   }, []);
 
   // This mounted stuff is to prevent errors in expo router.
-  if (pca === undefined) {
+  if (pca.current === undefined) {
     return null;
   }
 
   return (
-    <MsalProvider instance={pca}>
+    <MsalProvider instance={pca.current}>
       {children}
     </MsalProvider>
   )
