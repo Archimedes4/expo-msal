@@ -16,7 +16,11 @@ public class ExpoMsalModule: Module {
         // is by default dispatched on the different thread than the JavaScript runtime runs on.
         AsyncFunction("acquireTokenInteractively") { (config: MSALConfig, promise: Promise) in
             if (applicationContext === nil) {
-                loadApplication(config: config)
+                let result = loadApplication(config: config)
+                if (result != "Okay") {
+                    promise.resolve(TokenResult(result: ResultState.error.rawValue, data: result))
+                    return
+                }
             }
             guard let applicationContext = self.applicationContext else {
                 promise.resolve(TokenResult(result: ResultState.error.rawValue, data: "No Application"))
@@ -50,7 +54,11 @@ public class ExpoMsalModule: Module {
         }.runOnQueue(.main)
         AsyncFunction("acquireTokenSilently") { (config: MSALConfig, promise: Promise) in
             if (applicationContext === nil) {
-                loadApplication(config: config)
+                let result = loadApplication(config: config)
+                if (result != "Okay") {
+                    promise.resolve(TokenResult(result: ResultState.error.rawValue, data: result))
+                    return
+                }
             }
             guard let applicationContext = self.applicationContext else {
                 promise.resolve(TokenResult(result: ResultState.error.rawValue, data: "No Application"))
@@ -110,19 +118,18 @@ public class ExpoMsalModule: Module {
         }.runOnQueue(.main)
     }
     
-    func loadApplication(config: MSALConfig) {
+    func loadApplication(config: MSALConfig) -> String {
         do {
             guard let authorityURL = URL(string: config.authority) else {
-                  return
+                  return "Invalid Authority"
             }
             let authority = try MSALAADAuthority(url: authorityURL)
                     
-            let msalConfiguration = MSALPublicClientApplicationConfig(clientId: config.clientId,
-                                                                      redirectUri: config.redirectUri,
-                                                                      authority: authority)
+            let msalConfiguration = MSALPublicClientApplicationConfig(clientId: config.clientId, redirectUri: config.redirectUri, authority: authority)
             self.applicationContext = try MSALPublicClientApplication(configuration: msalConfiguration)
+            return "Okay"
         } catch {
-            
+            return error.localizedDescription
         }
     }
 }
