@@ -10,20 +10,29 @@ public class ExpoMsalModule: Module {
         // Sets the name of the module that JavaScript code will use to refer to the module. Takes a string as an argument.
         // Can be inferred from module's class name, but it's recommended to set it explicitly for clarity.
         // The module will be accessible from `requireNativeModule('<%- project.name %>')` in JavaScript.
+        var active = false
         Name("ExpoMsal")
         
         // Defines a JavaScript function that always returns a Promise and whose native code
         // is by default dispatched on the different thread than the JavaScript runtime runs on.
         AsyncFunction("acquireTokenInteractively") { (config: MSALConfig, promise: Promise) in
+            if (active == true) {
+                promise.resolve(TokenResult(result: ResultState.error.rawValue, data: "Active"))
+            }
+            
+            active = true
+            
             if (applicationContext === nil) {
                 let result = loadApplication(config: config)
                 if (result != "Okay") {
                     promise.resolve(TokenResult(result: ResultState.error.rawValue, data: result))
+                    active = false
                     return
                 }
             }
             guard let applicationContext = self.applicationContext else {
                 promise.resolve(TokenResult(result: ResultState.error.rawValue, data: "No Application"))
+                active = false
                 return
             }
             let keyWindow = UIApplication.shared.windows.filter {$0.isKeyWindow}.first
@@ -40,28 +49,40 @@ public class ExpoMsalModule: Module {
                     guard let result = result else {
                         guard let error = error else {
                             promise.resolve(TokenResult(result: ResultState.error.rawValue, data: "Something went wrong, no error produced."))
+                            active = false
                             return
                         }
                         promise.resolve(TokenResult(result: ResultState.error.rawValue, data: error.localizedDescription))
+                        active = false
                         return
                     }
                     
                     promise.resolve(TokenResult(result: ResultState.success.rawValue, data: result.accessToken))
+                    active = false
                 }
             } else {
                 promise.resolve(TokenResult(result: ResultState.error.rawValue, data: "Could not find root view controller"))
+                active = false
             }
         }.runOnQueue(.main)
         AsyncFunction("acquireTokenSilently") { (config: MSALConfig, promise: Promise) in
+            if (active == true) {
+                promise.resolve(TokenResult(result: ResultState.error.rawValue, data: "Active"))
+            }
+            
+            active = true
+            
             if (applicationContext === nil) {
                 let result = loadApplication(config: config)
                 if (result != "Okay") {
                     promise.resolve(TokenResult(result: ResultState.error.rawValue, data: result))
+                    active = false
                     return
                 }
             }
             guard let applicationContext = self.applicationContext else {
                 promise.resolve(TokenResult(result: ResultState.error.rawValue, data: "No Application"))
+                active = false
                 return
             }
             let msalParameters = MSALParameters()
@@ -73,25 +94,36 @@ public class ExpoMsalModule: Module {
                         guard let result = result else {
                             guard let error = error else {
                                 promise.resolve(TokenResult(result: ResultState.error.rawValue, data: "Something went wrong, no error produced."))
+                                active = false
                                 return
                             }
                             promise.resolve(TokenResult(result: ResultState.error.rawValue, data: error.localizedDescription))
+                            active = false
                             return
                         }
                         promise.resolve(TokenResult(result: ResultState.success.rawValue, data: result.accessToken))
+                        active = false
                         return
                     }
                 } else {
                   promise.resolve(TokenResult(result: ResultState.error.rawValue, data: "No Token Has been found"))
+                    active = false
                 }
             })
         }.runOnQueue(.main)
         AsyncFunction("signOut") { (config: MSALConfig, promise: Promise) in
+            if (active == true) {
+                promise.resolve(TokenResult(result: ResultState.error.rawValue, data: "Active"))
+            }
+            
+            active = true
+            
             if (applicationContext === nil) {
                 loadApplication(config: config)
             }
             guard let applicationContext = self.applicationContext else {
                 promise.resolve(false)
+                active = false
                 return
             }
             let keyWindow = UIApplication.shared.windows.filter {$0.isKeyWindow}.first
@@ -109,11 +141,13 @@ public class ExpoMsalModule: Module {
                         let signOutParams = MSALSignoutParameters(webviewParameters: webViewParamaters)
                         applicationContext.signout(with: currentAccount, signoutParameters: signOutParams) {result,_ in
                             promise.resolve(result)
+                            active = false
                         }
                     }
                 })
             } else {
                 promise.resolve(false)
+                active = false
             }
         }.runOnQueue(.main)
     }
