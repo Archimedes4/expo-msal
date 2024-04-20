@@ -93,37 +93,45 @@ public class ExpoMsalModule: Module {
                     applicationContext.acquireTokenSilent(with: parameters) { (result, error) in
                         guard let result = result else {
                             guard let error = error else {
-                                promise.resolve(TokenResult(result: ResultState.error.rawValue, data: "Something went wrong, no error produced."))
                                 active = false
+                                promise.resolve(TokenResult(result: ResultState.error.rawValue, data: "Something went wrong, no error produced."))
                                 return
                             }
-                            promise.resolve(TokenResult(result: ResultState.error.rawValue, data: error.localizedDescription))
                             active = false
+                            promise.resolve(TokenResult(result: ResultState.error.rawValue, data: error.localizedDescription))
+                            
                             return
                         }
-                        promise.resolve(TokenResult(result: ResultState.success.rawValue, data: result.accessToken))
                         active = false
+                        promise.resolve(TokenResult(result: ResultState.success.rawValue, data: result.accessToken))
+                        
                         return
                     }
                 } else {
+                  active = false
                   promise.resolve(TokenResult(result: ResultState.error.rawValue, data: "No Token Has been found"))
-                    active = false
                 }
             })
         }.runOnQueue(.main)
         AsyncFunction("signOut") { (config: MSALConfig, promise: Promise) in
             if (active == true) {
                 promise.resolve(TokenResult(result: ResultState.error.rawValue, data: "Active"))
+                return
             }
             
             active = true
             
             if (applicationContext === nil) {
-                loadApplication(config: config)
+                let result = loadApplication(config: config)
+                if (result != "Okay") {
+                    active = false
+                    promise.resolve(TokenResult(result: ResultState.error.rawValue, data: result))
+                    return
+                }
             }
             guard let applicationContext = self.applicationContext else {
-                promise.resolve(false)
                 active = false
+                promise.resolve(false);
                 return
             }
             let keyWindow = UIApplication.shared.windows.filter {$0.isKeyWindow}.first
@@ -140,14 +148,15 @@ public class ExpoMsalModule: Module {
                         let webViewParamaters = MSALWebviewParameters(authPresentationViewController: topController)
                         let signOutParams = MSALSignoutParameters(webviewParameters: webViewParamaters)
                         applicationContext.signout(with: currentAccount, signoutParameters: signOutParams) {result,_ in
-                            promise.resolve(result)
                             active = false
+                            promise.resolve(result)
+                            return
                         }
                     }
                 })
             } else {
-                promise.resolve(false)
                 active = false
+                promise.resolve(false)
             }
         }.runOnQueue(.main)
     }
