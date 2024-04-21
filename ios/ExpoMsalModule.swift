@@ -3,6 +3,7 @@ import MSAL
 
 public class ExpoMsalModule: Module {
     var applicationContext : MSALPublicClientApplication?
+    var account : MSALAccount?
     // Each module class must implement the definition function. The definition consists of components
     // that describes the module's functionality and behavior.
     // See https://docs.expo.dev/modules/module-api for more details about available components.
@@ -87,31 +88,24 @@ public class ExpoMsalModule: Module {
             }
             let msalParameters = MSALParameters()
             msalParameters.completionBlockQueue = DispatchQueue.main
-            applicationContext.getCurrentAccount(with: msalParameters, completionBlock: { (currentAccount, previousAccount, error) in
+            getAccount() { currentAccount in
                 if let currentAccount = currentAccount {
                     let parameters = MSALSilentTokenParameters(scopes: config.scopes, account: currentAccount)
                     applicationContext.acquireTokenSilent(with: parameters) { (result, error) in
                         guard let result = result else {
-                            guard let error = error else {
-                                active = false
-                                promise.resolve(TokenResult(result: ResultState.error.rawValue, data: "Something went wrong, no error produced."))
-                                return
-                            }
                             active = false
-                            promise.resolve(TokenResult(result: ResultState.error.rawValue, data: error.localizedDescription))
-                            
+                            promise.resolve(TokenResult(result: ResultState.error.rawValue, data: "Something went wrong"))
                             return
                         }
                         active = false
                         promise.resolve(TokenResult(result: ResultState.success.rawValue, data: result.accessToken))
-                        
                         return
                     }
                 } else {
-                  active = false
-                  promise.resolve(TokenResult(result: ResultState.error.rawValue, data: "No Token Has been found"))
+                    active = false
+                    promise.resolve(TokenResult(result: ResultState.error.rawValue, data: "No Token Has been found"))
                 }
-            })
+            }
         }.runOnQueue(.main)
         AsyncFunction("signOut") { (config: MSALConfig, promise: Promise) in
             if (active == true) {
@@ -142,7 +136,7 @@ public class ExpoMsalModule: Module {
                 }
                 let msalParameters = MSALParameters()
                 msalParameters.completionBlockQueue = DispatchQueue.main
-                applicationContext.getCurrentAccount(with: msalParameters, completionBlock: { (currentAccount, previousAccount, error) in
+                getAccount() { currentAccount in
                     if let currentAccount = currentAccount {
                         let parameters = MSALSilentTokenParameters(scopes: config.scopes, account: currentAccount)
                         let webViewParamaters = MSALWebviewParameters(authPresentationViewController: topController)
@@ -152,8 +146,11 @@ public class ExpoMsalModule: Module {
                             promise.resolve(result)
                             return
                         }
+                    } else {
+                        active = false
+                        promise.resolve(false)
                     }
-                })
+                }
             } else {
                 active = false
                 promise.resolve(false)
@@ -174,6 +171,26 @@ public class ExpoMsalModule: Module {
         } catch {
             return error.localizedDescription
         }
+    }
+    func getAccount(completion: @escaping (MSALAccount?) -> Void) {
+        if (self.account != nil) {
+            completion(self.account)
+            return
+        }
+        guard let applicationContext = self.applicationContext else {
+            completion(nil)
+            return
+        }
+        let msalParameters = MSALParameters()
+        msalParameters.completionBlockQueue = DispatchQueue.main
+        var completed = false
+        applicationContext.getCurrentAccount(with: msalParameters, completionBlock: { (currentAccount, previousAccount, error) in
+            self.account = currentAccount
+            if (!completed) {
+                completion(currentAccount)
+                completed = true
+            }
+        })
     }
 }
 
